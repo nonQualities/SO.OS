@@ -16,13 +16,11 @@ int main(int argc, char *argv[]){
             exit(EXIT_SUCCESS);
     }
 
-
-    while(dptr=readdir (drip)){
+    while((dptr = readdir(drip))){
         printf("%s\n", dptr->d_name);
     }
 
     closedir(drip);
-
 
     return 0;
 }
