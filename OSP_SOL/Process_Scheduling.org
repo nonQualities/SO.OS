@@ -1,0 +1,29 @@
+#+TITLE: Process_Scheduling
+#+AUTHOR: Ronit Choudhury
+#+DESCRIPTION: This file has solutions of exercises of questions listed in Operating Systems Principles Book
+
+* Exercises
+
+1. (5.1): Discuss how the following criteria conflict in certain settings.
+   a. CPU Utilization vs Response Time
+      - Context Switch Overhead:
+        To maximise response time in interactive systems, requires frequent preemtion
+        and short time quanta. Every preemtion triggers a *context switch* which means saving
+        registers, flushign translation lookaside buffers (TLBs) and invalidating CPU caches,
+        whilist which the CPU does zero useful work, thus reducing CPU utilization.
+      - Batch Efficiency vs Interactivity:
+        To maximize CPU utilization, a scheduler prefers letting CPU-bound processes run uninterrupted
+        for long durations so cache locality remains warm and scheduling overhead stays negligible.
+        However, holding the CPU for a long burst starves newly arrived interactive requests, causing response time to spike.
+   b. Average Turnaround Time vs. Maximum Waiting Time
+      - Short-Job Bias vs. Starvation:
+        Minimizing average turnaround time provably favors executing shorter jobs ahead of longer ones (Shortest Job First or Shortest Remaining Time First), because clearing small tasks quickly reduces the cumulative completion time across all processes.
+      - Tail Latency Trade-off:
+        In a workload with a continuous stream of short arrivals, prioritizing short jobs pushes long-running processes to the back of the queue indefinitely. While the average turnaround time stays remarkably low, the maximum waiting time (worst-case tail latency) for those long processes grows unboundedly, leading to starvation.
+   c. I/O Device Utilization vs. CPU Utilization
+      - Priority Inversion of Bottlenecks:
+        High I/O device utilization requires keeping slow peripherals (disks, network interfaces) constantly fed with requests. To achieve this, schedulers prioritize I/O-bound processes whenever they become ready so they can quickly run a brief CPU burst and issue their next I/O call—even if that means interrupting a long-running CPU-bound job.
+      - Fragmented Execution vs. Sustained Throughput:
+        Frequently preempting CPU-bound processes to service I/O-bound ones introduces context-switch overhead and disrupts CPU cache state, reducing CPU utilization. Conversely, if the scheduler favors CPU-bound tasks to keep the processor saturated, I/O-bound processes sit idle in the ready queue, leaving expensive I/O devices underutilized.
+
+2.
