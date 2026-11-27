@@ -1,3 +1,17 @@
+/*
+ * Experiment 5(c): First-Come, First-Served (FCFS) CPU Scheduling
+ * What it does: Schedules n processes strictly in order of arrival (assumed
+ *               t = 0 in input order) and calculates waiting and turnaround
+ *               times along with their averages.
+ * How it works: Reads each process's burst time in arrival order; assigns
+ *               wait[0] = 0 and wait[i] = wait[i-1] + burst[i-1], and sets
+ *               turnaround[i] = wait[i] + burst[i].
+ * Related OS Concepts:
+ *   - Non-Preemptive FIFO Ready-Queue Dispatching
+ *   - Convoy Effect (Short Processes Delayed Behind a Long CPU-Bound Job)
+ *   - Waiting Time and Turnaround Time in Batch Scheduling
+ */
+
 #include <stdio.h>
 
 #define MAX_PROCESSES 10
@@ -22,6 +36,7 @@ int main(void)
         return 1;
     }
 
+    /* Compute WT and TAT inline in arrival order as a prefix sum of bursts. */
     for (i = 0; i < n; i++) {
         p[i].pid = i + 1;
         printf("Burst time of process %d: ", p[i].pid);
@@ -30,6 +45,7 @@ int main(void)
             return 1;
         }
 
+        /* First process starts immediately; subsequent wait for prior finish. */
         p[i].wait = (i == 0) ? 0 : p[i - 1].wait + p[i - 1].burst;
         p[i].turnaround = p[i].wait + p[i].burst;
         total_wait += p[i].wait;

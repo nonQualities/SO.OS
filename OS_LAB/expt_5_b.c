@@ -1,7 +1,23 @@
+/*
+ * Experiment 5(b): Round Robin (RR) Preemptive CPU Scheduling
+ * What it does: Simulates time-shared Round Robin scheduling for n processes
+ *               (arriving at t = 0) given a fixed time quantum, outputting a
+ *               Gantt chart trace and waiting/turnaround statistics.
+ * How it works: Repeatedly cycles through the process list; each unfinished
+ *               process executes for min(remaining, quantum) units. When
+ *               remaining reaches zero, turnaround = completion time and
+ *               wait = turnaround - burst.
+ * Related OS Concepts:
+ *   - Preemptive Time-Sharing Scheduling and Time Quantum (Time Slice)
+ *   - Context Switching Overhead vs. Responsiveness Trade-off
+ *   - Gantt Chart Execution Timeline and Fairness (Starvation-Free)
+ */
+
 #include <stdio.h>
 
 #define MAX_PROCESSES 10
 
+/* Process descriptor tracking total burst and remaining CPU time. */
 struct process {
     int pid;
     int burst;
@@ -42,6 +58,7 @@ int main(void)
         p[i].turnaround = 0;
     }
 
+    /* Circular ready-queue simulation until all n processes finish. */
     printf("\nGantt chart:\n");
     while (completed < n) {
         for (i = 0; i < n; i++) {
@@ -50,15 +67,17 @@ int main(void)
             if (p[i].remaining == 0)
                 continue;
 
+            /* Grant at most one quantum (or remaining burst if smaller). */
             slice = (p[i].remaining < quantum) ? p[i].remaining : quantum;
             printf("P%d [%d - %d]\n", p[i].pid, time, time + slice);
 
             time += slice;
             p[i].remaining -= slice;
 
+            /* Record completion metrics once the process finishes its burst. */
             if (p[i].remaining == 0) {
-                p[i].turnaround = time;
-                p[i].wait = time - p[i].burst;
+                p[i].turnaround = time;                 /* arrival = 0 */
+                p[i].wait = time - p[i].burst;          /* WT = TAT - BT */
                 total_wait += p[i].wait;
                 total_turnaround += p[i].turnaround;
                 completed++;

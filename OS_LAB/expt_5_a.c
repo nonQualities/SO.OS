@@ -1,8 +1,24 @@
+/*
+ * Experiment 5(a): Non-Preemptive Priority CPU Scheduling
+ * What it does: Schedules n processes (all arriving at t = 0) in ascending
+ *               priority-number order and computes per-process and average
+ *               waiting and turnaround times.
+ * How it works: Reads burst time and integer priority for each process, sorts
+ *               the process table via qsort() using comparator by_priority()
+ *               (breaking ties by PID to preserve FCFS arrival order), and
+ *               accumulates elapsed CPU time to compute wait and turnaround.
+ * Related OS Concepts:
+ *   - Non-Preemptive CPU Scheduling and Priority Assignment
+ *   - Scheduling Metrics: Waiting Time (WT) and Turnaround Time (TAT)
+ *   - Starvation (Indefinite Blocking) and Aging as a Mitigation Strategy
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #define MAX_PROCESSES 10
 
+/* Process Control Block (PCB) representation for scheduling simulation. */
 struct process {
     int pid;
     int priority;
@@ -11,6 +27,7 @@ struct process {
     int turnaround;
 };
 
+/* qsort comparator: orders by priority ascending, then PID ascending. */
 static int by_priority(const void *a, const void *b)
 {
     const struct process *x = a;
@@ -44,11 +61,13 @@ int main(void)
         }
     }
 
+    /* Order processes from highest priority (lowest integer) to lowest. */
     qsort(p, n, sizeof p[0], by_priority);
 
+    /* Non-preemptive dispatch: each process runs to completion upon selection. */
     for (i = 0; i < n; i++) {
-        p[i].wait = elapsed;
-        p[i].turnaround = elapsed + p[i].burst;
+        p[i].wait = elapsed;                  /* WT = start time (arrival = 0) */
+        p[i].turnaround = elapsed + p[i].burst; /* TAT = WT + Burst Time */
         elapsed += p[i].burst;
         total_wait += p[i].wait;
         total_turnaround += p[i].turnaround;

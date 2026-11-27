@@ -1,3 +1,19 @@
+/*
+ * Experiment 8: Deadlock Avoidance Using Banker's Algorithm
+ * What it does: Determines whether a system of n processes and r resource types
+ *               is in a safe state and, if so, outputs a valid safe execution
+ *               sequence along with Allocation, Max, Need, and Available tables.
+ * How it works: Reads Max, Allocation, and Available vectors; computes
+ *               Need[i][j] = Max[i][j] - Allocation[i][j]; then iteratively
+ *               selects an unfinished process whose Need <= Work, simulates its
+ *               completion by adding Allocation to Work, and checks if all n
+ *               processes finish.
+ * Related OS Concepts:
+ *   - Deadlock Avoidance vs. Prevention and Detection
+ *   - Safe State, Unsafe State, and Safe Sequence Invariant
+ *   - Resource Allocation Matrices (Max, Allocation, Need, Available)
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -9,6 +25,7 @@ int alloc[MAX][MAX];
 int need[MAX][MAX];
 int avail[MAX];
 
+/* Read a validated integer from stdin, terminating on malformed input. */
 static int read_int(const char *prompt)
 {
     int value;
@@ -21,6 +38,7 @@ static int read_int(const char *prompt)
     return value;
 }
 
+/* Populate an n x r resource matrix (Max or Allocation) from stdin. */
 static void read_matrix(int matrix[MAX][MAX], const char *name)
 {
     int i, j;
@@ -36,6 +54,7 @@ static void read_matrix(int matrix[MAX][MAX], const char *name)
     }
 }
 
+/* Gather system dimensions, Max, Allocation, and Available vectors. */
 static void input(void)
 {
     int j;
@@ -59,6 +78,7 @@ static void input(void)
     }
 }
 
+/* Display formatted Allocation, Max, Need, and Available resource tables. */
 static void show(void)
 {
     int i, j;
@@ -89,6 +109,7 @@ static void show(void)
     }
 }
 
+/* Execute Dijkstra's Safety Algorithm to verify existence of a safe sequence. */
 static void check_safe(void)
 {
     int finish[MAX] = {0};
@@ -97,13 +118,16 @@ static void check_safe(void)
     int count = 0;
     int i, j;
 
+    /* Step 1: Compute remaining Need matrix = Max - Allocation. */
     for (i = 0; i < n; i++)
         for (j = 0; j < r; j++)
             need[i][j] = max_need[i][j] - alloc[i][j];
 
+    /* Step 2: Initialize Work vector to currently Available resources. */
     for (j = 0; j < r; j++)
         work[j] = avail[j];
 
+    /* Step 3: Greedily find unfinished processes whose Need <= Work. */
     while (count < n) {
         int found = 0;
 
@@ -115,6 +139,7 @@ static void check_safe(void)
                 ;
 
             if (j == r) {               /* all needs can be met */
+                /* Simulate process completion and reclaim allocated resources. */
                 for (j = 0; j < r; j++)
                     work[j] += alloc[i][j];
                 finish[i] = 1;
@@ -127,6 +152,7 @@ static void check_safe(void)
             break;                      /* no process can finish */
     }
 
+    /* Step 4: Safe iff every process could be scheduled to completion. */
     if (count == n) {
         printf("\nSystem is in a safe state.\nSafe sequence: ");
         for (i = 0; i < n; i++)

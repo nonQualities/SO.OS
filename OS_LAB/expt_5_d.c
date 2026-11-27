@@ -1,3 +1,17 @@
+/*
+ * Experiment 5(d): Non-Preemptive Shortest Job First (SJF) CPU Scheduling
+ * What it does: Schedules n processes (all arriving at t = 0) in non-decreasing
+ *               order of CPU burst duration and computes waiting and
+ *               turnaround metrics.
+ * How it works: Reads burst times, sorts the process array with qsort() via
+ *               overflow-safe comparator by_burst(), and accumulates elapsed
+ *               execution time to determine each process's wait and turnaround.
+ * Related OS Concepts:
+ *   - Optimal Average Waiting Time Property for Non-Preemptive Scheduling
+ *   - Burst-Time Prediction (Exponential Averaging) in Real OS Kernels
+ *   - Potential Starvation of Long CPU-Bound Processes
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,6 +24,7 @@ struct process {
     int turnaround;
 };
 
+/* Overflow-safe qsort comparator ordering processes by burst time ascending. */
 static int by_burst(const void *a, const void *b)
 {
     const struct process *x = a;
@@ -40,8 +55,10 @@ int main(void)
         }
     }
 
+    /* Sort by shortest burst first to minimize mean waiting time. */
     qsort(p, n, sizeof p[0], by_burst);
 
+    /* Accumulate running clock to compute WT and TAT for each sorted job. */
     for (i = 0; i < n; i++) {
         p[i].wait = elapsed;
         p[i].turnaround = elapsed + p[i].burst;
